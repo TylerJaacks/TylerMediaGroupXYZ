@@ -1,21 +1,105 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="stylesheet" href="index.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <title>Tyler Media Group</title>
 
-        <title>Tyler Jaacks</title>
-    </head> 
-    <body>
-        <div class="topnav">
-            <a href="index.html">Home</a>
-            <a href="cydia/index.html">Cydia Repo</a>
-            <a href="xbox_app_store/index.html">Xbox App Store</a>
-            <a href="resume/index.html">Resume</a>
-            <a href="about/index.html">About</a>
-            <a href="contact/index.html">Contact</a>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('menu[role="tablist"] li[role="tab"]');
+            const tabPanels = document.querySelectorAll('.tabs [role="tabpanel"]');
+
+            tabs.forEach((tab, index) => {
+                tab.addEventListener('click', (event) => {
+                    event.preventDefault();
+
+                    tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+                    tabPanels.forEach(panel => panel.hidden = true);
+
+                    tab.setAttribute('aria-selected', 'true');
+                    tabPanels[index].hidden = false;
+                });
+            });
+        });
+
+        var loadingTask = pdfjsLib.getDocument('resume.pdf');
+
+        loadingTask.promise.then(function (pdf) {
+            console.log('PDF loaded');
+
+            // Fetch the first page
+            var pageNumber = 1;
+            pdf.getPage(pageNumber).then(function (page) {
+                console.log('Page loaded');
+
+                var scale = 1.5;
+                var viewport = page.getViewport({ scale: scale });
+
+                // Prepare canvas using PDF page dimensions
+                var canvas = document.getElementById('pdf-canvas');
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Render PDF page into canvas context
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                var renderTask = page.render(renderContext);
+                renderTask.promise.then(function () {
+                    console.log('Page rendered');
+                });
+            });
+        }, function (reason) {
+            // PDF loading error
+            console.error(reason);
+        });
+    </script>
+
+<body>
+    <div class="window about-window">
+        <div class="title-bar">
+            <div class="title-bar-text">
+                Tyler Media Group
+            </div>
         </div>
-    </body>
+        <div class="window-body">
+
+
+            <menu role="tablist">
+                <li role="tab" aria-selected="true"><a href="#tabs">About me</a></li>
+                <li role="tab"><a href="#tabs">Resume</a></li>
+                <li role="tab"><a href="#tabs">Cydia</a></li>
+            </menu>
+
+            <div class="tabs">
+                <div class="window selected" role="tabpanel">
+                    <div class="window-body">
+                        <p><b>Name:</b> Tyler Jaacks</p>
+                        <p><b>Pronouns:</b> He/Him/His</p>
+                        <p><b>Languages:</b> English, Japanese (Beginner)</p>
+                    </div>
+                </div>
+                <div class="window" role="tabpanel" hidden>
+                    <div class="window-body">
+                        <canvas id="pdf-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="window" role="tabpanel" hidden>
+                    <div class="window-body">
+                        <p>If you are looking for my Cydia repository, click go to Cydia.</p>
+                        <button onclick="window.location.href='https://tylermediagroup.xyz/cydia'">Go to Cydia</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>
